@@ -41,31 +41,49 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 千葉工業大学「web3・AI概論」ハンズオン教材「教えて、minta先生」の最小WebUIプロトタイプです。
 
-**作成したもの:**
+**構成:**
 - Next.js (App Router) + Gemini API による質問・回答WebUI
-- テキスト入力欄に質問を入れると、AIが回答を返すシンプルな1画面アプリ
+- Supabase による会話履歴の保存
+- Vercel へのデプロイ
 
-## 動作確認済み
+## 到達点
 
-- 確認日: 2026-06-03
-- 確認環境: localhost:3000
-- 使用モデル: `gemini-2.5-flash-lite`
-- 動作: 質問を入力すると Gemini API から回答が返ることを確認済み
+- [x] **Step 1** — ローカルで Next.js + Gemini API WebUI が動作（localhost:3000）
+- [x] **Step 2** — Vercel にデプロイし、公開URLで動作確認済み
+- [x] **Step 3** — Supabase と連携し、`chat_histories` テーブルに `question` / `answer` / `created_at` が保存されることを確認済み
+
+**公開URL:** https://access-wisdom.vercel.app/
+
+**使用モデル:** `gemini-2.5-flash-lite`
+
+**確認日:** 2026-06-03
 
 ## 環境変数
 
 `.env.local` を作成し、以下を設定してください。
 
 ```
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_gemini_api_key
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
-- APIキーは [Google AI Studio](https://aistudio.google.com/apikey) で取得できます
-- `.env.local` は `.gitignore` により Git に含まれません。**キーをコミットしないよう注意してください**
-- サンプルファイルとして `.env.local.example` を用意しています
+- `GEMINI_API_KEY` は [Google AI Studio](https://aistudio.google.com/apikey) で取得
+- `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` は Supabase ダッシュボード → Settings → API で取得
+- `.env.local` は `.gitignore` により Git に含まれません。**キーを絶対にコミットしないでください**
+- Vercel にデプロイする場合は、同じ変数を Vercel の Environment Variables にも設定してください
 
-## 次のステップ候補
+## Supabase テーブル定義
 
-- [ ] Vercel へのデプロイ
-- [ ] Supabase 接続（会話履歴の保存）
-- [ ] 品質工学ワークベンチ化（パラメータ設計・実験管理）
+```sql
+create table chat_histories (
+  id         uuid primary key default gen_random_uuid(),
+  question   text not null,
+  answer     text not null,
+  created_at timestamptz default now()
+);
+```
+
+## 次の予定
+
+- [ ] 品質工学「思考の足あと」WebUI への改造
