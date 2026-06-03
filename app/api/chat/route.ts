@@ -62,7 +62,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ reply: text });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "不明なエラー";
-    return NextResponse.json({ error: `APIエラー: ${message}` }, { status: 500 });
+    const raw = err instanceof Error ? err.message : String(err);
+    console.error("API route error:", raw);
+
+    const isOverloaded = /503|high demand|overloaded/i.test(raw);
+    const userMessage = isOverloaded
+      ? "現在AIが混み合っています。少し時間をおいて、もう一度お試しください。"
+      : "AIとの通信中にエラーが発生しました。しばらくしてから再試行してください。";
+
+    return NextResponse.json({ error: userMessage }, { status: 503 });
   }
 }
