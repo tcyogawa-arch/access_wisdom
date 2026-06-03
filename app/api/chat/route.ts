@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,13 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const result = await model.generateContent(message);
     const text = result.response.text();
+
+    const { error: dbError } = await supabase
+      .from("chat_histories")
+      .insert({ question: message, answer: text });
+    if (dbError) {
+      console.error("Supabase insert error:", dbError.message);
+    }
 
     return NextResponse.json({ reply: text });
   } catch (err: unknown) {
